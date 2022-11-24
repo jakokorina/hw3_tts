@@ -13,7 +13,6 @@ from tqdm import tqdm
 from hw_tts.base import BaseTrainer
 from hw_tts.base.base_text_encoder import BaseTextEncoder
 from hw_tts.logger.utils import plot_spectrogram_to_buf
-from hw_tts.metric.utils import calc_cer, calc_wer
 from hw_tts.utils import inf_loop, MetricTracker
 
 
@@ -26,7 +25,6 @@ class Trainer(BaseTrainer):
             self,
             model,
             criterion,
-            metrics,
             optimizer,
             config,
             device,
@@ -36,7 +34,7 @@ class Trainer(BaseTrainer):
             len_epoch=None,
             skip_oom=True,
     ):
-        super().__init__(model, criterion, metrics, optimizer, config, device)
+        super().__init__(model, criterion, optimizer, config, device)
         self.skip_oom = skip_oom
         self.text_encoder = text_encoder
         self.config = config
@@ -53,10 +51,10 @@ class Trainer(BaseTrainer):
         self.log_step = 50
 
         self.train_metrics = MetricTracker(
-            "loss", "grad norm", *[m.name for m in self.metrics], writer=self.writer
+            "loss", "grad norm", writer=self.writer
         )
         self.evaluation_metrics = MetricTracker(
-            "loss", *[m.name for m in self.metrics], writer=self.writer
+            "loss", writer=self.writer
         )
 
     @staticmethod
@@ -154,8 +152,6 @@ class Trainer(BaseTrainer):
                 self.lr_scheduler.step()
 
         metrics.update("loss", batch["loss"].item())
-        for met in self.metrics:
-            metrics.update(met.name, met(**batch))
         return batch
 
     def _evaluation_epoch(self, epoch, part, dataloader):
@@ -222,6 +218,7 @@ class Trainer(BaseTrainer):
         shuffle(tuples)
         rows = {}
         for pred, target, raw_pred, audio_path in tuples[:examples_to_log]:
+            # TODO: refactor
             target = BaseTextEncoder.normalize_text(target)
             wer = calc_wer(target, pred) * 100
             cer = calc_cer(target, pred) * 100

@@ -6,11 +6,10 @@ import numpy as np
 import torch
 
 import hw_tts.loss as module_loss
-import hw_tts.metric as module_metric
 import hw_tts.model as module_arch
 from hw_tts.trainer import Trainer
 from hw_tts.utils import prepare_device
-from hw_tts.utils.object_loading import get_dataloaders
+from hw_tts.utils.object_loading import get_dataloader
 from hw_tts.utils.parse_config import ConfigParser
 
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -30,7 +29,7 @@ def main(config):
     text_encoder = config.get_text_encoder()
 
     # setup data_loader instances
-    dataloaders = get_dataloaders(config, text_encoder)
+    dataloader = get_dataloader(config)
 
     # build model architecture, then print to console
     model = config.init_obj(config["arch"], module_arch, n_class=len(text_encoder))
@@ -44,10 +43,6 @@ def main(config):
 
     # get function handles of loss and metrics
     loss_module = config.init_obj(config["loss"], module_loss).to(device)
-    metrics = [
-        config.init_obj(metric_dict, module_metric, text_encoder=text_encoder)
-        for metric_dict in config["metrics"]
-    ]
 
     # build optimizer, learning rate scheduler. delete every line containing lr_scheduler for
     # disabling scheduler
@@ -58,12 +53,11 @@ def main(config):
     trainer = Trainer(
         model,
         loss_module,
-        metrics,
         optimizer,
         text_encoder=text_encoder,
         config=config,
         device=device,
-        dataloaders=dataloaders,
+        dataloaders=dataloader,
         lr_scheduler=lr_scheduler,
         len_epoch=config["trainer"].get("len_epoch", None)
     )
