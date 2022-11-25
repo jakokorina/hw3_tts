@@ -6,7 +6,7 @@ import numpy as np
 from torch.utils.data import Dataset
 from tqdm import tqdm
 
-from utils import process_text
+from hw_tts.waveglow.utils import process_text
 from hw_tts.text import text_to_sequence
 
 

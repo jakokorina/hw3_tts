@@ -5,6 +5,9 @@ tqdm
 tensorboard
 matplotlib
 pandas
+unidecode
+hparams
+gdown==4.5.4
 
 speechbrain~=0.5.12
 datasets
