@@ -20,10 +20,13 @@ class FFTBlock(nn.Module):
         self.slf_attn = MultiHeadAttention(n_head, d_model, d_k, d_v, dropout=dropout)
         self.pos_ffn = PositionwiseFeedForward(d_model, d_inner, fft_conv1d_kernel,
                                                fft_conv1d_padding, dropout=dropout)
+        self.layer_norm = nn.LayerNorm(d_model)
 
     def forward(self, enc_input, non_pad_mask=None, slf_attn_mask=None):
+        # Pre-layer norm transformer
+        mha_input = self.layer_norm(enc_input)
         enc_output, enc_slf_attn = self.slf_attn(
-            enc_input, enc_input, enc_input, mask=slf_attn_mask)
+            mha_input, mha_input, mha_input, mask=slf_attn_mask)
 
         if non_pad_mask is not None:
             enc_output *= non_pad_mask
