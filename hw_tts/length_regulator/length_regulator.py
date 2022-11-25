@@ -48,6 +48,7 @@ class LengthRegulator(nn.Module):
             return output, duration_predictor_output
             # return duplicated output and duration prediction output
         else:
+            duration_predictor_output = torch.exp(duration_predictor_output) - 1
             duration_predictor_output = ((duration_predictor_output * alpha) + 0.5).int()
             output = self.LR(x, duration_predictor_output)
 
