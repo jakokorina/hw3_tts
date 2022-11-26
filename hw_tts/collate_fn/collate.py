@@ -49,18 +49,18 @@ def reprocess_tensor(batch, cut_list):
     return out
 
 
-def collate_fn_tensor(batch: List[Dict], config):
+def collate_fn_tensor(batch: List[Dict], batch_expand_size):
     len_arr = np.array([d["text"].size(0) for d in batch])
     index_arr = np.argsort(-len_arr)
     batchsize = len(batch)
-    real_batchsize = batchsize // config.batch_expand_size
+    real_batchsize = batchsize // batch_expand_size
 
     cut_list = list()
-    for i in range(config.batch_expand_size):
+    for i in range(batch_expand_size):
         cut_list.append(index_arr[i * real_batchsize:(i + 1) * real_batchsize])
 
     output = list()
-    for i in range(config.batch_expand_size):
+    for i in range(batch_expand_size):
         output.append(reprocess_tensor(batch, cut_list[i]))
 
     return output
