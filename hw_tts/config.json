@@ -43,7 +43,7 @@
           "english_cleaners"
         ]
       },
-      "module": "hw_tts.models"
+      "module": "hw_tts.datasets"
     }
   },
   "optimizer": {
