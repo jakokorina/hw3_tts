@@ -5,8 +5,8 @@ import numpy as np
 from scipy.io.wavfile import read
 from scipy.io.wavfile import write
 
-import stft as stft
-import hparams_audio as hparams
+import hw_tts.audio.stft as stft
+import hw_tts.audio.hparams_audio as hparams
 from .audio_processing import griffin_lim
 
 _stft = stft.TacotronSTFT(
