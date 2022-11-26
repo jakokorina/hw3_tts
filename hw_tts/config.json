@@ -81,7 +81,7 @@
     "early_stop": 100,
     "visualize": "wandb",
     "wandb_project": "tts_project",
-    "len_epoch": 800,
+    "len_epoch": 25,
     "grad_norm_clip": 1
   }
 }
