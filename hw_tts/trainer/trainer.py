@@ -27,7 +27,7 @@ class Trainer(BaseTrainer):
             optimizer,
             config,
             device,
-            dataloaders,
+            dataloader,
             lr_scheduler=None,
             len_epoch=None,
             skip_oom=True,
@@ -35,7 +35,7 @@ class Trainer(BaseTrainer):
         super().__init__(model, criterion, optimizer, config, device)
         self.skip_oom = skip_oom
         self.config = config
-        self.train_dataloader = dataloaders["train"]
+        self.train_dataloader = dataloader
         if len_epoch is None:
             # epoch-based training
             self.len_epoch = len(self.train_dataloader)
@@ -43,7 +43,6 @@ class Trainer(BaseTrainer):
             # iteration-based training
             self.train_dataloader = inf_loop(self.train_dataloader)
             self.len_epoch = len_epoch
-        self.evaluation_dataloaders = {k: v for k, v in dataloaders.items() if k != "train"}
         self.lr_scheduler = lr_scheduler
         self.log_step = 50
 

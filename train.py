@@ -53,7 +53,7 @@ def main(config):
         optimizer,
         config=config,
         device=device,
-        dataloaders=dataloader,
+        dataloader=dataloader,
         lr_scheduler=lr_scheduler,
         len_epoch=config["trainer"].get("len_epoch", None)
     )
