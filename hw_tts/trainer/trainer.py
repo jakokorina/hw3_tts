@@ -6,7 +6,6 @@ import hw_tts.synthesis.synthesis as synthesis
 import hw_tts.synthesis.utils
 
 from torch.nn.utils import clip_grad_norm_
-from torchvision.transforms import ToTensor
 from tqdm import tqdm
 
 from hw_tts.base import BaseTrainer
@@ -159,7 +158,9 @@ class Trainer(BaseTrainer):
             self.optimizer.step()
             if self.lr_scheduler is not None:
                 self.lr_scheduler.step()
-
+        metrics.update("loss", t_l)
+        metrics.update("mel_loss", m_l)
+        metrics.update("duration_loss", d_l)
         return batch
 
     def _evaluation_epoch(self, epoch):
