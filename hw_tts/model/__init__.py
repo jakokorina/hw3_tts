@@ -1,1 +1,1 @@
-from fastspeech2 import FastSpeech
+from .fastspeech2 import FastSpeech
