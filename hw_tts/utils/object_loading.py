@@ -2,28 +2,28 @@ from operator import xor
 
 from torch.utils.data import ConcatDataset, DataLoader
 
-import hw_tts.augmentations
 import hw_tts.datasets
 from hw_tts.collate_fn.collate import collate_fn_tensor
 from hw_tts.utils.parse_config import ConfigParser
 
 
 def get_dataloader(configs: ConfigParser):
-    dataset = configs.init_obj(configs["data"], hw_tts.datasets)
+    params = configs["data"]
+    dataset = configs.init_obj(params["dataset"], hw_tts.datasets)
 
     dataloader = DataLoader(
         dataset,
-        batch_size=configs["data"]["batch_expand_size"] * configs["data"]["batch_size"],
+        batch_size=params.get("batch_expand_size") * params.get("batch_size"),
         shuffle=True,
         collate_fn=collate_fn_tensor,
         drop_last=True,
-        num_workers=0
+        num_workers=params.get("num_workers")
     )
 
     return dataloader
     # dataloaders = {}
     # for split, params in configs["data"].items():
-    #     num_workers = params.get("num_workers", 1)
+    #      num_workers = params.get("num_workers", 1)
     #
     #     # set train augmentations
     #     if split == 'train':

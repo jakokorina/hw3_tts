@@ -25,14 +25,11 @@ np.random.seed(SEED)
 def main(config):
     logger = config.get_logger("train")
 
-    # text_encoder
-    text_encoder = config.get_text_encoder()
-
     # setup data_loader instances
     dataloader = get_dataloader(config)
 
     # build model architecture, then print to console
-    model = config.init_obj(config["arch"], module_arch, n_class=len(text_encoder))
+    model = config.init_obj(config["arch"], module_arch)
     logger.info(model)
 
     # prepare for (multi-device) GPU training
@@ -41,7 +38,7 @@ def main(config):
     if len(device_ids) > 1:
         model = torch.nn.DataParallel(model, device_ids=device_ids)
 
-    # get function handles of loss and metrics
+    # get function handles of loss
     loss_module = config.init_obj(config["loss"], module_loss).to(device)
 
     # build optimizer, learning rate scheduler. delete every line containing lr_scheduler for
@@ -54,7 +51,6 @@ def main(config):
         model,
         loss_module,
         optimizer,
-        text_encoder=text_encoder,
         config=config,
         device=device,
         dataloaders=dataloader,

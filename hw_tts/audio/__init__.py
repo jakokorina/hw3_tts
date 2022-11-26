@@ -1,4 +1,4 @@
-import audio.hparams_audio
-import audio.tools
-import audio.stft
-import audio.audio_processing
+import hparams_audio
+import tools
+import stft
+import audio_processing

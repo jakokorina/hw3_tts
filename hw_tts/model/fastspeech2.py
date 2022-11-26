@@ -21,7 +21,7 @@ class FastSpeech(nn.Module):
     def __init__(self, max_seq_len, encoder_n_layer, decoder_n_layer, vocab_size, encoder_dim, PAD,
                  encoder_conv1d_filter_size, encoder_head, fft_conv1d_kernel,
                  fft_conv1d_padding, duration_predictor_filter_size,
-                 duration_predictor_kernel_size, num_mels, dropout=0.1):
+                 duration_predictor_kernel_size, num_mels, dropout=0.1, **kwargs):
         super(FastSpeech, self).__init__()
 
         self.encoder = Encoder(max_seq_len, encoder_n_layer, vocab_size, encoder_dim, PAD,

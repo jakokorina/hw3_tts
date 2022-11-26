@@ -9,7 +9,7 @@ from tqdm import tqdm
 import hw_tts.model as module_model
 from hw_tts.trainer import Trainer
 from hw_tts.utils import ROOT_PATH
-from hw_tts.utils.object_loading import get_dataloaders
+from hw_tts.utils.object_loading import get_dataloader
 from hw_tts.utils.parse_config import ConfigParser
 
 DEFAULT_CHECKPOINT_PATH = ROOT_PATH / "default_test_model" / "checkpoint.pth"
@@ -25,7 +25,7 @@ def main(config, out_file):
     text_encoder = config.get_text_encoder()
 
     # setup data_loader instances
-    dataloaders = get_dataloaders(config, text_encoder)
+    dataloaders = get_dataloader(config)
 
     # build model architecture
     model = config.init_obj(config["arch"], module_model, n_class=len(text_encoder))

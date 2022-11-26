@@ -6,6 +6,7 @@ tensorboard
 matplotlib
 pandas
 unidecode
+inflect
 gdown==4.5.4
 
 speechbrain~=0.5.12
