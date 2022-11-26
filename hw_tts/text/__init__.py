@@ -1,6 +1,6 @@
 """ from https://github.com/keithito/tacotron """
 import re
-import cleaners
+import hw_tts.text.cleaners as cleaners
 from .symbols import symbols
 
 
