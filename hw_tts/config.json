@@ -41,6 +41,8 @@
         "data_path": "./data/train.txt",
         "mel_ground_truth": "./mels",
         "alignment_path": "./alignments",
+        "pitch_paths" :"./pitches",
+        "energy_paths" :"./energies",
         "text_cleaners": [
           "english_cleaners"
         ]
