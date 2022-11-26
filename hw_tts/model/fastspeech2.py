@@ -37,8 +37,8 @@ class FastSpeech(nn.Module):
                                           )
         self.energy_embedding = nn.Embedding(n_bins, encoder_dim)
         self.energy_bins = nn.Parameter(
-                torch.linspace(energy_stat[0], energy_stat[1], n_bins - 1),
-                requires_grad=False,
+            torch.linspace(energy_stat[0], energy_stat[1], n_bins - 1),
+            requires_grad=False,
         )
 
         self.pitch_predictor = Predictor(encoder_dim, duration_predictor_filter_size,
@@ -65,6 +65,7 @@ class FastSpeech(nn.Module):
     def _get_pitch_prediction(self, x, target=None):
         prediction = self.pitch_predictor(x)
         if target is None:
+            prediction = torch.exp(prediction) - 1
             embedding = self.pitch_embedding(torch.bucketize(prediction, self.pitch_bins))
             return embedding
         else:
@@ -74,6 +75,7 @@ class FastSpeech(nn.Module):
     def _get_energy_prediction(self, x, target=None):
         prediction = self.energy_predictor(x)
         if target is None:
+            prediction = torch.exp(prediction) - 1
             embedding = self.energy_embedding(torch.bucketize(prediction, self.energy_bins))
             return embedding
         else:
