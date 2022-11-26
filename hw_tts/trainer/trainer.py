@@ -46,7 +46,7 @@ class Trainer(BaseTrainer):
         self.log_step = 200
 
         self.train_metrics = MetricTracker(
-            "loss", "mel_loss", "duration_loss", "grad norm", writer=self.writer
+            "loss", "mel_loss", "duration_loss", "pitch_loss", "energy_loss", "grad norm", writer=self.writer
         )
 
         self.test_data = hw_tts.synthesis.utils.get_data()
@@ -124,6 +124,8 @@ class Trainer(BaseTrainer):
         character = batch["text"].long().to(self.device)
         mel_target = batch["mel_target"].float().to(self.device)
         duration = batch["duration"].int().to(self.device)
+        energy = batch["energy"].float().to(self.device)
+        pitch = batch["pitch"].float().to(self.device)
         mel_pos = batch["mel_pos"].long().to(self.device)
         src_pos = batch["src_pos"].long().to(self.device)
         max_mel_len = batch["mel_max_len"]
@@ -132,24 +134,35 @@ class Trainer(BaseTrainer):
             self.optimizer.zero_grad()
 
         # Forward
-        mel_output, duration_predictor_output = self.model(character,
-                                                           src_pos,
-                                                           mel_pos=mel_pos,
-                                                           mel_max_length=max_mel_len,
-                                                           length_target=duration)
+        mel_output, duration_output, pitch_out, energy_out = self.model(character,
+                                                                        src_pos,
+                                                                        mel_pos=mel_pos,
+                                                                        mel_max_length=max_mel_len,
+                                                                        length_target=duration,
+                                                                        pitch_target=pitch,
+                                                                        energy_target=energy)
         # Calc loss
-        mel_loss, duration_loss = self.loss(mel_output,
-                                            duration_predictor_output,
-                                            mel_target,
-                                            duration)
-        total_loss = mel_loss + duration_loss
+        mel_loss, duration_loss, pitch_loss, energy_loss = self.loss(mel_output,
+                                                                     duration_output,
+                                                                     pitch_out,
+                                                                     energy_out,
+                                                                     mel_target,
+                                                                     duration,
+                                                                     pitch,
+                                                                     energy)
+
+        total_loss = mel_loss + duration_loss + pitch_loss + energy_loss
 
         t_l = total_loss.detach().cpu().numpy()
         m_l = mel_loss.detach().cpu().numpy()
         d_l = duration_loss.detach().cpu().numpy()
+        p_l = pitch_loss.detach().cpu().numpy()
+        e_l = energy_loss.detach().cpu().numpy()
         batch["duration_loss"] = d_l
         batch["mel_loss"] = m_l
         batch["total_loss"] = t_l
+        batch["pitch_loss"] = p_l
+        batch["energy_loss"] = e_l
 
         # Backward
         if is_train:
@@ -161,6 +174,8 @@ class Trainer(BaseTrainer):
         metrics.update("loss", t_l)
         metrics.update("mel_loss", m_l)
         metrics.update("duration_loss", d_l)
+        metrics.update("pitch_loss", p_l)
+        metrics.update("energy_loss", e_l)
         return batch
 
     def _evaluation_epoch(self, epoch):

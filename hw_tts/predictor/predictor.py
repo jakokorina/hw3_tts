@@ -15,7 +15,7 @@ class Transpose(nn.Module):
         return x.transpose(self.dim_1, self.dim_2)
 
 
-class DurationPredictor(nn.Module):
+class Predictor(nn.Module):
     """ Duration Predictor """
 
     def __init__(self,
@@ -23,7 +23,7 @@ class DurationPredictor(nn.Module):
                  duration_predictor_filter_size,
                  duration_predictor_kernel_size,
                  dropout=0.1):
-        super(DurationPredictor, self).__init__()
+        super(Predictor, self).__init__()
 
         self.input_size = encoder_dim
         self.filter_size = duration_predictor_filter_size

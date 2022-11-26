@@ -1,18 +1,23 @@
 import time
 import torch
 import os
+import librosa
 import numpy as np
+import pyworld as pw
 
 from torch.utils.data import Dataset
 from tqdm import tqdm
 
 from hw_tts.waveglow.utils import process_text
 from hw_tts.text import text_to_sequence
+import hw_tts.audio.hparams_audio as hparams_audio
 
 
 def get_data_to_buffer(data_path, mel_ground_truth, alignment_path, text_cleaners):
     buffer = list()
     text = process_text(data_path)
+    wav_files = sorted([os.path.join("data/LJSpeech-1.1/wavs/", f) for f in os.listdir("data/LJSpeech-1.1/wavs/") \
+                        if os.path.isfile(os.path.join("data/LJSpeech-1.1/wavs/", f))])
 
     start = time.perf_counter()
     for i in tqdm(range(len(text))):
@@ -29,8 +34,25 @@ def get_data_to_buffer(data_path, mel_ground_truth, alignment_path, text_cleaner
         duration = torch.from_numpy(duration)
         mel_gt_target = torch.from_numpy(mel_gt_target)
 
-        buffer.append({"text": character, "duration": duration,
-                       "mel_target": mel_gt_target})
+        wav_path = wav_files[i]
+        wav, _ = librosa.load(wav_path)
+        pitch, t = pw.dio(
+            wav.astype(np.float64),
+            hparams_audio.sampling_rate,
+            frame_period=hparams_audio.hop_length / hparams_audio.sampling_rate * 1000,
+        )
+        pitch = pw.stonemask(wav.astype(np.float64), pitch, t, 22050)
+        pitch = torch.tensor(pitch[: sum(duration)])
+
+        energy = torch.stft(torch.tensor(wav),
+                            n_fft=1024,
+                            hop_length=256,
+                            win_length=1024
+                            ).transpose(0, 1)
+        energy = torch.linalg.norm(torch.sqrt(energy[:, :, 0] ** 2 + energy[:, :, 1] ** 2), dim=-1)
+
+        buffer.append({"text": character, "duration": duration, "mel_target": mel_gt_target,
+                       "pitch": pitch, "energy": energy})
 
     end = time.perf_counter()
     print("cost {:.2f}s to load all data into buffer.".format(end - start))

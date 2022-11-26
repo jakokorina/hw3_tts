@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .duration_predictor import DurationPredictor
+from hw_tts.predictor.predictor import Predictor
 from .aligner import create_alignment
 
 
@@ -16,7 +16,7 @@ class LengthRegulator(nn.Module):
                  dropout=0.1
                  ):
         super().__init__()
-        self.duration_predictor = DurationPredictor(
+        self.duration_predictor = Predictor(
             encoder_dim,
             duration_predictor_filter_size,
             duration_predictor_kernel_size,
