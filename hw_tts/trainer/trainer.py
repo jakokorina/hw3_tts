@@ -174,7 +174,7 @@ class Trainer(BaseTrainer):
         self.writer.set_step(epoch * self.len_epoch, "eval")
         for i, phn in tqdm(enumerate(self.test_data)):
             wav = synthesis.synthesis(self.model, self.device, self.waveglow, phn)
-            self._log_audio(wav, f"result_{i}")
+            self._log_audio(f"result_{i}", wav)
 
     def _progress(self, batch_idx):
         base = "[{}/{} ({:.0f}%)]"
