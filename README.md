@@ -43,7 +43,7 @@ output = "model.pth"
 gdown.download(url, output, quiet=False)
 ```
 
-5. If you want to train then download additional files:
+5. If you want not only to apply my model but to train yours train then download additional files:
 
 - Alignments:
 
