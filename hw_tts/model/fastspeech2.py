@@ -102,8 +102,8 @@ class FastSpeech(nn.Module):
         else:
             output, mel_pos = self.length_regulator(x, alpha)
             output = output + \
-                     self._get_pitch_prediction(output, alpha_p) + \
-                     self._get_energy_prediction(output, alpha_e)
+                     self._get_pitch_prediction(output, alpha=alpha_p) + \
+                     self._get_energy_prediction(output, alpha=alpha_e)
             output = self.decoder(output, mel_pos)
             output = self.mel_linear(output)
             return output
