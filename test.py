@@ -42,7 +42,7 @@ def main(config):
     os.makedirs("results", exist_ok=True)
     with torch.no_grad():
         for i, phn in tqdm(enumerate(test_data)):
-            synthesis.synthesis.synthesis(model, device, waveglow_model, phn, path="results/result_{i}_default.wav")
+            synthesis.synthesis.synthesis(model, device, waveglow_model, phn, path=f"results/result_{i}_default.wav")
 
             # speed changes
             synthesis.synthesis.synthesis(model, device, waveglow_model, phn, alpha=0.8,
