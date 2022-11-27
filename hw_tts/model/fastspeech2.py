@@ -62,20 +62,20 @@ class FastSpeech(nn.Module):
         mask = mask.unsqueeze(-1).expand(-1, -1, mel_output.size(-1))
         return mel_output.masked_fill(mask, 0.)
 
-    def _get_pitch_prediction(self, x, target=None):
+    def _get_pitch_prediction(self, x, target=None, alpha=1.0):
         prediction = self.pitch_predictor(x)
         if target is None:
-            prediction = torch.exp(prediction) - 1
+            prediction = (torch.exp(prediction) - 1) * alpha
             embedding = self.pitch_embedding(torch.bucketize(prediction, self.pitch_bins))
             return embedding
         else:
             embedding = self.pitch_embedding(torch.bucketize(target, self.pitch_bins))
             return prediction, embedding
 
-    def _get_energy_prediction(self, x, target=None):
+    def _get_energy_prediction(self, x, target=None, alpha=1.0):
         prediction = self.energy_predictor(x)
         if target is None:
-            prediction = torch.exp(prediction) - 1
+            prediction = (torch.exp(prediction) - 1) * alpha
             embedding = self.energy_embedding(torch.bucketize(prediction, self.energy_bins))
             return embedding
         else:
@@ -102,8 +102,8 @@ class FastSpeech(nn.Module):
         else:
             output, mel_pos = self.length_regulator(x, alpha)
             output = output + \
-                     alpha_p * self._get_pitch_prediction(output) + \
-                     alpha_e * self._get_energy_prediction(output)
+                     self._get_pitch_prediction(output, alpha_p) + \
+                     self._get_energy_prediction(output, alpha_e)
             output = self.decoder(output, mel_pos)
             output = self.mel_linear(output)
             return output
