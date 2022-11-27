@@ -46,29 +46,29 @@ def main(config):
 
             # speed changes
             synthesis.synthesis.synthesis(model, device, waveglow_model, phn, alpha=0.8,
-                                          path="results/result_{i}_s=0_8.wav")
+                                          path=f"results/result_{i}_s=0_8.wav")
             synthesis.synthesis.synthesis(model, device, waveglow_model, phn, alpha=1.2,
-                                          path="results/result_{i}_s=1_2.wav")
+                                          path=f"results/result_{i}_s=1_2.wav")
 
             # energy changes
             synthesis.synthesis.synthesis(model, device, waveglow_model, phn, alpha_e=0.8,
-                                          path="results/result_{i}_e=0_8.wav")
+                                          path=f"results/result_{i}_e=0_8.wav")
             synthesis.synthesis.synthesis(model, device, waveglow_model, phn, alpha_e=1.2,
-                                          path="results/result_{i}_e=1_2.wav")
+                                          path=f"results/result_{i}_e=1_2.wav")
 
             # pitch changes
             synthesis.synthesis.synthesis(model, device, waveglow_model, phn, alpha_p=0.8,
-                                          path="results/result_{i}_p=0_8.wav")
+                                          path=f"results/result_{i}_p=0_8.wav")
             synthesis.synthesis.synthesis(model, device, waveglow_model, phn, alpha_p=1.2,
-                                          path="results/result_{i}_p=1_2.wav")
+                                          path=f"results/result_{i}_p=1_2.wav")
 
             # all together changes
             synthesis.synthesis.synthesis(model, device, waveglow_model, phn,
                                           alpha_p=0.8, alpha_e=0.8, alpha=0.8,
-                                          path="results/result_{i}_all=0_8.wav")
+                                          path=f"results/result_{i}_all=0_8.wav")
             synthesis.synthesis.synthesis(model, device, waveglow_model, phn,
                                           alpha_p=1.2, alpha_e=1.2, alpha=1.2,
-                                          path="results/result_{i}_all=1_2.wav")
+                                          path=f"results/result_{i}_all=1_2.wav")
 
 
 if __name__ == "__main__":
