@@ -51,23 +51,23 @@ def main(config):
                                           path=f"results/result_{i}_s=1_2.wav")
 
             # energy changes
-            synthesis.synthesis.synthesis(model, device, waveglow_model, phn, alpha_e=0.8,
+            synthesis.synthesis.synthesis(model, device, waveglow_model, phn, alpha_e=0.2,
                                           path=f"results/result_{i}_e=0_8.wav")
-            synthesis.synthesis.synthesis(model, device, waveglow_model, phn, alpha_e=1.2,
+            synthesis.synthesis.synthesis(model, device, waveglow_model, phn, alpha_e=2.0,
                                           path=f"results/result_{i}_e=1_2.wav")
 
             # pitch changes
-            synthesis.synthesis.synthesis(model, device, waveglow_model, phn, alpha_p=0.8,
+            synthesis.synthesis.synthesis(model, device, waveglow_model, phn, alpha_p=0.2,
                                           path=f"results/result_{i}_p=0_8.wav")
-            synthesis.synthesis.synthesis(model, device, waveglow_model, phn, alpha_p=1.2,
+            synthesis.synthesis.synthesis(model, device, waveglow_model, phn, alpha_p=2.0,
                                           path=f"results/result_{i}_p=1_2.wav")
 
             # all together changes
             synthesis.synthesis.synthesis(model, device, waveglow_model, phn,
-                                          alpha_p=0.8, alpha_e=0.8, alpha=0.8,
+                                          alpha_p=0.2, alpha_e=0.2, alpha=0.8,
                                           path=f"results/result_{i}_all=0_8.wav")
             synthesis.synthesis.synthesis(model, device, waveglow_model, phn,
-                                          alpha_p=1.2, alpha_e=1.2, alpha=1.2,
+                                          alpha_p=2, alpha_e=2, alpha=1.2,
                                           path=f"results/result_{i}_all=1_2.wav")
 
 
