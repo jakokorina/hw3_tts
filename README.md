@@ -1,82 +1,184 @@
-# ASR project barebones
+# TTS project
 
 ## Installation guide
 
-< Write your installation guide here >
+1. Clone this repository
+
+```shell
+git clone https://github.com/jakokorina/hw3_tts.git
+cd hw3_tts 
+```
+
+2. Install requirements
 
 ```shell
 pip install -r ./requirements.txt
 ```
 
-## Recommended implementation order
+3. Download waveglow. Here's example on python but you can use
+   anything you want
 
-You might be a little intimidated by the number of folders and classes. Try to follow this steps to gradually undestand
-the workflow.
+```python
+import gdown
 
-1) Test `hw_asr/tests/test_dataset.py`  and `hw_asr/tests/test_config.py` and make sure everythin works for you
-2) Implement missing functions to fix tests in  `hw_asr\tests\test_text_encoder.py`
-3) Implement missing functions to fix tests in  `hw_asr\tests\test_dataloader.py`
-4) Implement functions in `hw_asr\metric\utils.py`
-5) Implement missing function to run `train.py` with a baseline model
-6) Write your own model and try to overfit it on a single batch
-7) Implement ctc beam search and add metrics to calculate WER and CER over hypothesis obtained from beam search.
-8) ~~Pain and suffering~~ Implement your own models and train them. You've mastered this template when you can tune your
-   experimental setup just by tuning `configs.json` file and running `train.py`
-9) Don't forget to write a report about your work
-10) Get hired by Google the next day
-
-## Before submitting
-
-0) Make sure your projects run on a new machine after complemeting the installation guide or by 
-   running it in docker container.
-1) Search project for `# TODO: your code here` and implement missing functionality
-2) Make sure all tests work without errors
-   ```shell
-   python -m unittest discover hw_tts/tests
-   ```
-3) Make sure `test.py` works fine and works as expected. You should create files `default_test_config.json` and your
-   installation guide should download your model checpoint and configs in `default_test_model/checkpoint.pth`
-   and `default_test_model/config.json`.
-   ```shell
-   python test.py \
-      -c default_test_config.json \
-      -r default_test_model/checkpoint.pth \
-      -t test_data \
-      -o test_result.json
-   ```
-4) Use `train.py` for training
-
-## Credits
-
-This repository is based on a heavily modified fork
-of [pytorch-template](https://github.com/victoresque/pytorch-template) repository.
-
-## Docker
-
-You can use this project with docker. Quick start:
-
-```bash 
-docker build -t my_hw_asr_image . 
-docker run \
-   --gpus '"device=0"' \
-   -it --rm \
-   -v /path/to/local/storage/dir:/repos/asr_project_template/data/datasets \
-   -e WANDB_API_KEY=<your_wandb_api_key> \
-	my_hw_asr_image python -m unittest 
+url = "https://drive.google.com/u/0/uc?id=1cJKJTmYd905a-9GFoo5gKjzhKjUVj83j"
+output = "mel.tar.gz"
+gdown.download(url, output, quiet=False)
 ```
 
-Notes:
+Then place it in right place
 
-* `-v /out/of/container/path:/inside/container/path` -- bind mount a path, so you wouldn't have to download datasets at
-  the start of every docker run.
-* `-e WANDB_API_KEY=<your_wandb_api_key>` -- set envvar for wandb (if you want to use it). You can find your API key
-  here: https://wandb.ai/authorize
+```shell
+mkdir hw_tts/waveglow/pretrained_model/
+mv waveglow_256channels_ljs_v2.pt hw_tts/waveglow/pretrained_model/waveglow_256channels.pt
+```
 
-## TODO
+4. Download my model checkpoint
 
-These barebones can use more tests. We highly encourage students to create pull requests to add more tests / new
-functionality. Current demands:
+```python
+import gdown
 
-* Tests for beam search
-* README section to describe folders
-* Notebook to show how to work with `ConfigParser` and `config_parser.init_obj(...)`
+url = "https://drive.google.com/u/0/uc?id=1zdxuCP1-szvx5TkKmSsAgAAQYE6VjuPx"
+output = "model.pth"
+gdown.download(url, output, quiet=False)
+```
+
+5. If you want to train then download additional files:
+
+- Alignments:
+
+```shell
+wget https://github.com/xcmyz/FastSpeech/raw/master/alignments.zip
+unzip alignments.zip
+```
+
+- MELS
+
+```python
+import gdown
+
+url = "https://drive.google.com/u/0/uc?id=1cJKJTmYd905a-9GFoo5gKjzhKjUVj83j"
+output = "mel.tar.gz"
+gdown.download(url, output, quiet=False)
+```
+
+```shell
+tar -xvf mel.tar.gz
+```
+
+- LJSpeech:
+
+```python
+import gdown
+
+url = "https://drive.google.com/u/0/uc?id=1-EdH0t0loc6vPiuVtXdhsDtzygWNSNZx"
+output = "train.txt"
+gdown.download(url, output, quiet=False)
+```
+
+```shell
+wget https://data.keithito.com/data/speech/LJSpeech-1.1.tar.bz2 -o /dev/null
+mkdir data
+tar -xvf LJSpeech-1.1.tar.bz2
+mv LJSpeech-1.1 data/LJSpeech-1.1
+mv train.txt data/
+```
+
+- Pitch and energy files preprocessed by me:
+
+```python
+import gdown
+
+url = "https://drive.google.com/uc?id=1-3aBBRfI1e9s4mzZLNbMyV-qiJ2T32IA"
+output = "pitch.tar.gz"
+gdown.download(url, output, quiet=False)
+
+url = "https://drive.google.com/uc?id=11ZURBIrG6JDJpC_SMSWpaQ4GXaDG1I2d"
+output = "energy.tar.gz"
+gdown.download(url, output, quiet=False)
+```
+
+```shell
+tar -xvf pitch.tar.gz
+tar -xvf energy.tar.gz
+```
+
+## What I did
+
+I took the code from our [seminar](https://github.com/markovka17/dla/blob/2022/week07/FastSpeech_sem.ipynb), 
+split it into files using asr_project_template. Then I replaced PreLayerNorm with Post LN, log(duration)
+instead of duration, and trained it. After that I computed pitch and energy embeddings, added them to training 
+pipeline and trained FastSpeech2. All modifications are available in commit history of this repo.
+All training logs can be found [here](https://wandb.ai/jakokorina/tts_project/overview?workspace=user-jakokorina).
+Note that WandB loggs audio with noise, in real audio there's no noise.
+WandB had some problems, that's why not all charts contain all data, but it can be found in the logs.
+
+The hardest thing was to reformat code and understand mechanism of energy and pitch
+predictions. 
+
+### Pitch and energy
+
+At first I computed pitch and energy during in `get_data_to_buffer` function like this: 
+
+```
+wav_files = sorted([os.path.join("data/LJSpeech-1.1/wavs/", f) for f in os.listdir("data/LJSpeech-1.1/wavs/") \
+                        if os.path.isfile(os.path.join("data/LJSpeech-1.1/wavs/", f))])
+
+
+wav_path = wav_files[i]
+wav, _ = librosa.load(wav_path)
+pitch, t = pw.dio(
+    wav.astype(np.float64),
+    hparams_audio.sampling_rate,
+    frame_period=hparams_audio.hop_length / hparams_audio.sampling_rate * 1000,
+)
+pitch = pw.stonemask(wav.astype(np.float64), pitch, t, 22050)
+pitch = torch.tensor(pitch[: sum(duration)])
+
+energy = torch.stft(torch.tensor(wav),
+                    n_fft=1024,
+                    hop_length=256,
+                    win_length=1024
+                    ).transpose(0, 1)
+energy = torch.linalg.norm(torch.sqrt(energy[:, :, 0] ** 2 + energy[:, :, 1] ** 2), dim=-1)
+```
+
+But then I realized that this computation takes a lot of time, so I decided to
+save `energy` and `pitch` from above into files using `torch.save` and then load 
+them from files. Loading pipeline can be found in my repo. 
+
+### FastSpeech2 w/o energy and pitch
+
+I don't have resulting files for this model because I thought that WandB audio logging
+is correct. But I have all checkpoints and I can give them on request. 
+
+## Results
+
+They are located in the `results` folder. I used the following sentences:
+
+```
+"A defibrillator is a device that gives a high energy electric shock to the heart of someone who is in cardiac arrest",
+"Massachusetts Institute of Technology may be best known for its math, science and engineering education",
+"Wasserstein distance or Kantorovich Rubinstein metric is a distance function defined between probability distributions on a given metric space"
+```
+
+I attached TTS versions of this sentences in different modes:
+- Default mode (_default)
+- +- 20% of speed(s), pitch(p) and energy(e)
+- +- 20% of speed, pitch and energy all together(_all)
+
+The  number in the name of .wav corresponds to index of sentence in the list above.
+
+## Reproducing
+
+- Training
+```shell
+python3 train.py -c hw_tts/config.json
+```
+- Testing
+```shell
+python3 test.py -c hw_tts/config.json -r model.pth
+```
+
+Note that if you want to change the frases you can pass a list of  sentences into the
+`synthesis.utils.get_data()` on line 41 of `test.py`.
