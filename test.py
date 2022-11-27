@@ -15,7 +15,7 @@ from hw_tts.utils.parse_config import ConfigParser
 DEFAULT_CHECKPOINT_PATH = ROOT_PATH / "default_test_model" / "checkpoint.pth"
 
 
-def main(config, out_file):
+def main(config):
     logger = config.get_logger("test")
 
     # define cpu or gpu if possible
@@ -37,11 +37,38 @@ def main(config, out_file):
     waveglow_model = waveglow.utils.get_WaveGlow().to(device)
     model.eval()
 
+    # you can pass your test data as list of str
     test_data = synthesis.utils.get_data()
-
+    os.makedirs("results", exist_ok=True)
     with torch.no_grad():
         for i, phn in tqdm(enumerate(test_data)):
-            synthesis.synthesis.synthesis(model, device, waveglow_model, phn, path="./result_{i}.wav")
+            synthesis.synthesis.synthesis(model, device, waveglow_model, phn, path="results/result_{i}_default.wav")
+
+            # speed changes
+            synthesis.synthesis.synthesis(model, device, waveglow_model, phn, alpha=0.8,
+                                          path="results/result_{i}_s=0_8.wav")
+            synthesis.synthesis.synthesis(model, device, waveglow_model, phn, alpha=1.2,
+                                          path="results/result_{i}_s=1_2.wav")
+
+            # energy changes
+            synthesis.synthesis.synthesis(model, device, waveglow_model, phn, alpha_e=0.8,
+                                          path="results/result_{i}_e=0_8.wav")
+            synthesis.synthesis.synthesis(model, device, waveglow_model, phn, alpha_e=1.2,
+                                          path="results/result_{i}_e=1_2.wav")
+
+            # pitch changes
+            synthesis.synthesis.synthesis(model, device, waveglow_model, phn, alpha_p=0.8,
+                                          path="results/result_{i}_p=0_8.wav")
+            synthesis.synthesis.synthesis(model, device, waveglow_model, phn, alpha_p=1.2,
+                                          path="results/result_{i}_p=1_2.wav")
+
+            # all together changes
+            synthesis.synthesis.synthesis(model, device, waveglow_model, phn,
+                                          alpha_p=0.8, alpha_e=0.8, alpha=0.8,
+                                          path="results/result_{i}_all=0_8.wav")
+            synthesis.synthesis.synthesis(model, device, waveglow_model, phn,
+                                          alpha_p=1.2, alpha_e=1.2, alpha=1.2,
+                                          path="results/result_{i}_all=1_2.wav")
 
 
 if __name__ == "__main__":
@@ -67,34 +94,6 @@ if __name__ == "__main__":
         type=str,
         help="indices of GPUs to enable (default: all)",
     )
-    args.add_argument(
-        "-o",
-        "--output",
-        default="output.json",
-        type=str,
-        help="File to write results (.json)",
-    )
-    args.add_argument(
-        "-t",
-        "--test-data-folder",
-        default=None,
-        type=str,
-        help="Path to dataset",
-    )
-    args.add_argument(
-        "-b",
-        "--batch-size",
-        default=20,
-        type=int,
-        help="Test dataset batch size",
-    )
-    args.add_argument(
-        "-j",
-        "--jobs",
-        default=1,
-        type=int,
-        help="Number of workers for test dataloader",
-    )
 
     args = args.parse_args()
 
@@ -114,29 +113,8 @@ if __name__ == "__main__":
             config.config.update(json.load(f))
 
     # if `--test-data-folder` was provided, set it as a default test set
-    if args.test_data_folder is not None:
-        test_data_folder = Path(args.test_data_folder).absolute().resolve()
-        assert test_data_folder.exists()
-        config.config["data"] = {
-            "test": {
-                "batch_size": args.batch_size,
-                "num_workers": args.jobs,
-                "datasets": [
-                    {
-                        "type": "CustomDirAudioDataset",
-                        "args": {
-                            "audio_dir": str(test_data_folder / "audio"),
-                            "transcription_dir": str(
-                                test_data_folder / "transcriptions"
-                            ),
-                        },
-                    }
-                ],
-            }
-        }
-
     assert config.config.get("data", {}).get("test", None) is not None
     config["data"]["test"]["batch_size"] = args.batch_size
     config["data"]["test"]["n_jobs"] = args.jobs
 
-    main(config, args.output)
+    main(config)
