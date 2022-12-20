@@ -180,5 +180,5 @@ python3 train.py -c hw_tts/config.json
 python3 test.py -c hw_tts/config.json -r model.pth
 ```
 
-Note that if you want to change the frases you can pass a list of  sentences into the
+Note that if you want to change the phrases you can pass a list of  sentences into the
 `synthesis.utils.get_data()` on line 41 of `test.py`.
